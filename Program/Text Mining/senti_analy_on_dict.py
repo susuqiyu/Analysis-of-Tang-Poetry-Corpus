@@ -2,7 +2,7 @@ import json
 import jieba
 
 
-__author__ = "Singularity Point"
+__author__ = "Suyu Wang"
 __version__ = "1.0.0"
 
 

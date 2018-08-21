@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 
-__author__ = "Singularity Point"
+__author__ = "Suyu Wang"
 __version__ = "1.5.0"
 
 
