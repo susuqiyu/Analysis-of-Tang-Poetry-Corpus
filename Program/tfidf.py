@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import jieba
 from sklearn.feature_extraction.text import CountVectorizer
@@ -6,13 +7,14 @@ from sklearn.feature_extraction.text import TfidfTransformer
 
 
 __author__ = "Suyu Wang"
-__version__ = "1.5.0"
+__version__ = "1.6.3"
 
 
 TANG_PATH = "/Users/apple/Documents/SingularityPnt/Analysis-of-Tang-Poetry-Corpus/Corpus"
 
 
 def refine_corpus(path):
+
     if os.path.isdir(path):
         files = [os.path.join(path, file) for file in os.listdir(path)]
     else:
@@ -21,14 +23,23 @@ def refine_corpus(path):
     titles = []
     corpus = []
 
+    ambiguity = re.compile("\{.*?\}")
+    redundancy = re.compile("\(.*?\)|\d")
+
     for file in files:
         with open(file) as f:
             poem_set = json.load(f)
 
         for poem in poem_set:
-            titles.append(poem["title"])
             paragraphs = "".join(poem["paragraphs"])
+            if ambiguity.search(paragraphs):
+                continue
+            else:
+                paragraphs = redundancy.sub("", paragraphs)
+
+            titles.append(poem["title"])
             token_poem = " ".join(jieba.lcut(paragraphs))
+
             corpus.append(token_poem)
 
         del poem_set
@@ -37,6 +48,7 @@ def refine_corpus(path):
 
 
 def calc_tfidf(corpus):
+
     vectorizer = CountVectorizer()
     transformer = TfidfTransformer()
     tf_matrix = vectorizer.fit_transform(corpus)
@@ -45,6 +57,7 @@ def calc_tfidf(corpus):
 
 
 def obtain_tfidf(path=TANG_PATH, save_file=None):
+
     print("Start loading the corpus...")
     titles, corpus = refine_corpus(TANG_PATH)
     print("Finish loading")
@@ -58,9 +71,36 @@ def obtain_tfidf(path=TANG_PATH, save_file=None):
 
     if save_file:
         print("Start saving the results...")
-        temp = {"titles":titles, "words":words, "tfidf":tfidf.tolist()}
+        temp = {"titles": titles, "words": words, "tfidf": tfidf.tolist()}
         with open(save_file, "w") as f:
             json.dump(temp, f)
         print("Finish saving")
     else:
         return titles, words, tfidf
+
+
+def view(titles, words, tfidf, view_title=None, scope=None):
+
+    if view_title:
+        index = titles.index(view_title)
+        if scope:
+            scope.append(index)
+        else:
+            scope = [index, ]
+
+    for i in scope:
+        title = titles[i]
+        print("-{}".format(title))
+
+        temp = []
+        row = tfidf[i]
+        for j, num in enumerate(row):
+            if num > 0:
+                temp.append((words[j], num))
+        temp = sorted(temp, reverse=True, key=lambda x: x[1])
+
+        for word, num in temp:
+            print("{} -> {}".format(word, num))
+
+        print()
+        print()
