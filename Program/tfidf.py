@@ -53,6 +53,7 @@ def calc_tfidf(corpus):
     transformer = TfidfTransformer()
     tf_matrix = vectorizer.fit_transform(corpus)
     tfidf = transformer.fit_transform(tf_matrix)
+
     return vectorizer.get_feature_names(), tfidf.toarray()
 
 
@@ -62,6 +63,7 @@ def obtain_tfidf(path=TANG_PATH, save_file=None):
     titles, corpus = refine_corpus(TANG_PATH)
     print("Finish loading")
     print()
+
     print("Start calculating the TF-IDF indices...")
     words, tfidf = calc_tfidf(corpus)
     print("Finish calculating")
@@ -75,8 +77,8 @@ def obtain_tfidf(path=TANG_PATH, save_file=None):
         with open(save_file, "w") as f:
             json.dump(temp, f)
         print("Finish saving")
-    else:
-        return titles, words, tfidf
+
+    return titles, words, tfidf
 
 
 def view(titles, words, tfidf, view_title=None, scope=None):
