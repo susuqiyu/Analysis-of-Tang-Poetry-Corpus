@@ -1,16 +1,20 @@
 import os
 import re
 import json
-import jieba
+#import jieba
+import pynlpir
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 
 __author__ = "Suyu Wang"
-__version__ = "1.6.3"
+__version__ = "1.7.3"
 
 
 TANG_PATH = "/Users/apple/Documents/SingularityPnt/Analysis-of-Tang-Poetry-Corpus/Corpus"
+
+
+pynlpir.open()
 
 
 def refine_corpus(path):
@@ -38,7 +42,8 @@ def refine_corpus(path):
                 paragraphs = redundancy.sub("", paragraphs)
 
             titles.append(poem["title"])
-            token_poem = " ".join(jieba.lcut(paragraphs))
+            #token_poem = " ".join(jieba.lcut(paragraphs, HMM=True))
+            token_poem = " ".join(pynlpir.segment(paragraphs, pos_tagging=False))
 
             corpus.append(token_poem)
 
